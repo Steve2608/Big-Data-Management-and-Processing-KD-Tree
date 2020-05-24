@@ -3,3 +3,6 @@
 
 # html exports
 KD-Tree experiments.html
+
+# png / graphviz files
+trees/

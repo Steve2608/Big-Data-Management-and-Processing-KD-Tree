@@ -1,6 +1,7 @@
 from typing import Optional, List, Tuple
 
 import numpy as np
+from graphviz import Digraph
 
 
 class KDTree:
@@ -181,6 +182,31 @@ class KDTree:
         ann += self.right.annotations if self.right else []
 
         return ann
+
+    def graph(self, axis_labels: Tuple[str]) -> Digraph:
+        g = Digraph()
+        self._graph(g, axis_labels)
+        g.format = 'png'
+        return g
+
+    def _graph(self, dot: Digraph, axis_labels: Tuple[str]) -> None:
+        if self.split:
+            root_name = str(self._root)
+            dot.node(name=root_name, label=root_name)
+
+            if self.left and self.left.split:
+                left_name = str(self.left._root)
+                dot.node(name=left_name, label=left_name)
+                dot.edge(root_name, left_name,
+                         label=f'{axis_labels[self._axis]}<{self.split[0][self._axis]}')
+                self.left._graph(dot, axis_labels)
+
+            if self.right and self.right.split:
+                right_name = str(self.right._root)
+                dot.node(name=right_name, label=right_name)
+                dot.edge(root_name, right_name,
+                         label=f'{axis_labels[self._axis]}>{self.split[0][self._axis]}')
+                self.right._graph(dot, axis_labels)
 
     def __str__(self):
         return f'KDTree of {self._min_dims, self._max_dims}'

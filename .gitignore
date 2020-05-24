@@ -1,2 +1,5 @@
 .idea/
 .ipynb_checkpoints/
+
+# html exports
+KD-Tree experiments.html

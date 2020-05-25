@@ -1,7 +1,9 @@
 from typing import Optional, List, Tuple
 
 import numpy as np
+import plotly.graph_objs as go
 from graphviz import Digraph
+from plotly.offline import iplot
 
 
 class KDTree:
@@ -210,3 +212,69 @@ class KDTree:
 
     def __str__(self):
         return f'KDTree of {self._min_dims, self._max_dims}'
+
+
+def get_tree(n: int, *, digits: int = 2) -> KDTree:
+    # set seed for reproducibility
+    np.random.seed(6)
+
+    array = np.random.random((n, 2))
+    rounded = np.round(array, digits)
+    return KDTree(rounded)
+
+
+def plot_tree(tree: KDTree, *, X: np.ndarray = None, path: str = 'temp'):
+    DATA = np.asarray(tree.data) if X is None else X
+
+    trace = go.Scatter(
+        x=DATA[:, 0],
+        y=DATA[:, 1],
+        mode='markers',
+        marker={
+            'size': 10,
+            'color': 'black'
+        },
+        text=tree.annotations,
+        name='Data Points'
+    )
+    layout = {
+        'shapes': [
+            {
+                'type': 'rect',
+                'x0': x0,
+                'y0': y0,
+                'x1': x1,
+                'y1': y1,
+                'line': {
+                    'color': 'rgb(50, 171, 96)' if x0 == x1 else 'rgb(250, 50, 50)',
+                    'width': 2
+                },
+                'layer': 'below'
+            }
+            for (x0, y0), (x1, y1) in tree.bounding_boxes
+
+        ],
+        'showlegend': True,
+        'width': 980,
+        'height': 750
+    }
+    fig = {
+        'data': [trace],
+        'layout': layout,
+    }
+    iplot(fig)
+
+    dot = tree.graph(axis_labels=tuple('xy'))
+    dot.render(filename=path, directory='./trees')
+    return dot
+
+
+if __name__ == '__main__':
+    tree = get_tree(5)
+    plot_tree(tree)
+
+    tree = tree.add(np.asarray([0.5, 0.5]))
+    plot_tree(tree)
+
+    tree = tree.delete(tree.data[0])
+    plot_tree(tree)

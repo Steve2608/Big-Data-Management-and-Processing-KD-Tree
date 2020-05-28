@@ -1,4 +1,4 @@
 graphviz==0.14
 jupyter
 numpy==1.18.4
-plotly==4.7.1
+plotly==4.8.0
